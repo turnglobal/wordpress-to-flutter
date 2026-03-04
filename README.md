@@ -1,4 +1,4 @@
-# WordPress to Flutter App (WP2F)
+# WordPress to Flutter (Android and iOS Support)
 
 A production-ready **WordPress to Flutter app template** for **Android and iOS**, built with **Flutter Material 3**.  
 This project consumes the WordPress REST API and includes modern UX patterns, category browsing, search, comments, sharing, offline cache mode, and integration hooks for OneSignal, AdMob, and deep links.
@@ -138,6 +138,59 @@ flutter run \
 - OneSignal: `lib/src/services/notification_service.dart`
 - AdMob: `lib/src/services/ad_service.dart`
 - Dynamic deep links: `lib/src/services/deep_link_service.dart`
+
+## Production API Proxy (Recommended)
+
+For production deployments, design the WordPress proxy API as a layered, high-scale service:
+
+### 1. Edge Layer
+
+- CDN in front of API (`Cloudflare` / `Fastly` / `CloudFront`)
+- WAF + bot protection
+- TLS termination and rate limiting at edge
+
+### 2. API Gateway Layer
+
+- Single public entry (`api.yourdomain.com`)
+- Request auth, quotas, and per-client throttling
+- CORS allowlist and request size limits
+
+### 3. Application Layer (Proxy Service)
+
+- Stateless backend instances (horizontal scaling)
+- Strict allowlist of upstream WordPress routes
+- Input validation for query params and comment payloads
+- Response shaping (return only fields required by mobile app)
+
+### 4. Data and Cache Layer
+
+- Redis cache for feed endpoints (`latest`, `featured`, `categories`)
+- Cache keys include route + query (`page`, `per_page`, `category`)
+- Short TTL for feed freshness (for example 30-120 seconds)
+- Separate lower TTL/no-cache for comments write paths
+
+### 5. Security and Secrets
+
+- Store `WP_BASE_URL`, `WP_USER`, `WP_APP_PASS` in secret manager/env
+- Never expose WordPress credentials to client apps
+- Rotate app password on a schedule
+- Optional signed client tokens (JWT) + device attestation
+
+### 6. Reliability and Operations
+
+- Timeouts + retries with backoff for WordPress upstream
+- Circuit breaker/fallback for upstream failures
+- Structured logs, metrics, tracing, and alerting
+- Blue/green or rolling deploys with health checks
+
+### 7. Recommended Endpoint Strategy
+
+- Keep mobile contract stable and versioned: `/v1/posts/latest`, `/v1/posts/search`, `/v1/comments`
+- Do not expose raw WordPress admin routes
+- Add pagination cursors or consistent page-based strategy
+- Add abuse controls on comment submission endpoints
+
+This design gives better performance, security, and operational stability than direct WordPress access from the client.
 
 ## License
 
