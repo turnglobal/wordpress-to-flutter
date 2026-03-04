@@ -1,143 +1,145 @@
-# wp2fapp
+# WordPress to Flutter App (WP2F)
 
-Flutter app foundation for consuming WordPress content through the WP REST API on both Android and iOS.
+A production-ready **WordPress to Flutter app template** for **Android and iOS**, built with **Flutter Material 3**.  
+This project consumes the WordPress REST API and includes modern UX patterns, category browsing, search, comments, sharing, offline cache mode, and integration hooks for OneSignal, AdMob, and deep links.
+
+Keywords: WordPress Flutter app, WordPress API Flutter, Flutter news app, Android iOS WordPress app, Material 3 Flutter template.
+
+## App Preview
+
+![WordPress to Flutter app preview](https://i.imgur.com/5QIwXpn.png)
 
 ## Credits
 
-- Fully developed by Chandima Galahitiyawa.
-- Funded by Turn.Global for the community.
-- Released under the GNU General Public License v3.0 (see `LICENSE`).
+- Fully developed by **Chandima Galahitiyawa**
+- Funded by **Turn.Global** for the community
+- Licensed under **GNU GPL v3.0** (see [LICENSE](LICENSE))
 
-## Implemented Foundation
+## Features
 
-- WordPress API connection with Application Password support
-- Latest posts feed with infinite scroll
-- Featured posts section
-- Categories filter chips
-- Post search screen
-- Post detail with comments, related posts, embedded media, and share
-- Light / dark / system theme switching
-- Local caching via `SharedPreferences`
-- Integration scaffolding for OneSignal, AdMob, and dynamic deep links
+- WordPress REST API integration with Application Password support
+- Latest posts with infinite scroll
+- Featured posts slider
+- Category filters and category-based post listing
+- Search posts by keyword
+- Post details with author/date/category metadata
+- Embedded media support (video + allowed embed sources)
+- WordPress comments read + submit
+- Related posts from same category
+- Share posts
+- Light / Dark / System theme
+- Offline cache mode + clear cache action
+- Integration hooks for OneSignal, AdMob, and dynamic deep links
 
-## Root Config File
+## Tech Stack
 
-Edit the root file:
+- Flutter (Material 3)
+- Provider state management
+- `http` for API calls
+- `shared_preferences` for app state/cache
+- `flutter_secure_storage` for sensitive local values
 
-- `/Users/user/StudioProjects/wp2fapp/app_config.json`
+## Project Structure
 
-Use these global keys:
+- `lib/src/config/` app configuration loading
+- `lib/src/services/` API, cache, integrations
+- `lib/src/repositories/` repository layer
+- `lib/src/viewmodels/` view models
+- `lib/src/screens/` app screens
+- `lib/src/widgets/` reusable UI widgets
+
+## Configuration
+
+### 1. Use the example file
+
+Copy `app_config.example.json` to `app_config.json`.
+
+### 2. Update `app_config.json`
+
+`app_config.json` is loaded at app startup and used globally.
+
+Required keys:
 
 - `wp_domain`
 - `wp_user`
 - `wp_app_pass`
 
-Optional integration keys:
+Optional keys:
 
 - `oneSignalAppId`
 - `admobAndroidAppId`
 - `admobIosAppId`
 
-You can copy from:
+Example:
 
-- `/Users/user/StudioProjects/wp2fapp/app_config.example.json`
-
-The app loads this file at startup and uses it globally for API/auth/media URL normalization.
-
-Security note:
-
-- Do not commit real `wp_user` / `wp_app_pass` values.
-- Prefer build-time defines for production:
-  - `--dart-define=WP_DOMAIN=...`
-  - `--dart-define=WP_USER=...`
-  - `--dart-define=WP_APP_PASS=...`
-- `wp_app_pass` in a client app is still extractable from the built binary. For production-grade security, use a backend proxy/token service instead of direct WordPress application-password auth from client.
-
-## Production API Proxy (Recommended)
-
-To make this app production-safe, keep WordPress credentials on a backend server and let the app call your backend API.
-
-### Why
-
-- Mobile/web client binaries can be reverse-engineered.
-- Any credential bundled in app config can be extracted.
-- A backend proxy lets you apply rate limits, validation, caching, and abuse controls.
-
-### Architecture
-
-1. Flutter app -> your backend API (`https://api.yourdomain.com`)
-2. Backend API -> WordPress REST API (`https://dash.yourdomain.com/wp-json/...`)
-3. Backend injects `Authorization: Basic ...` using server environment variables only.
-
-### Required backend env vars
-
-- `WP_BASE_URL`
-- `WP_USER`
-- `WP_APP_PASS`
-
-Optional:
-
-- `APP_API_KEY` or JWT secret for client auth
-- Redis URL for caching
-
-### Endpoint design options
-
-Option A (zero Flutter code changes): Transparent proxy  
-Mirror the same WordPress routes under your API domain, for example:
-
-- `GET /wp-json/wp/v2/posts`
-- `GET /wp-json/wp/v2/categories`
-- `GET /wp-json/wp/v2/comments`
-- `POST /wp-json/wp/v2/comments`
-
-Then set `wp_domain` to your API domain in `app_config.json`.
-
-Option B (custom API contract):  
-Create app-specific endpoints:
-
-- `GET /posts/latest`
-- `GET /posts/featured`
-- `GET /posts/category/:id`
-- `GET /categories`
-- `GET /posts/search?q=...`
-- `GET /posts/:id/comments`
-- `POST /posts/:id/comments`
-
-This requires updating Flutter data layer route paths.
-
-### Minimum backend security controls
-
-- CORS allowlist (web origin only)
-- Request validation and payload size limits
-- Rate limiting per IP/device/user
-- Short cache for public feed endpoints
-- Structured logs and monitoring
-- Abuse protection for comments
-
-### Rotation policy
-
-- Rotate WordPress App Password immediately if it was ever committed.
-- Revoke old credentials after backend deployment.
-
-## Platform Readiness
-
-### Android
-
-- `INTERNET`, `ACCESS_NETWORK_STATE`, and `AD_ID` permissions are added in `android/app/src/main/AndroidManifest.xml`.
-
-### iOS
-
-- `NSAppTransportSecurity` + `NSAllowsArbitraryLoadsInWebContent` is added in `ios/Runner/Info.plist` for embedded web media.
+```json
+{
+  "wp_domain": "https://dashboard.your-site.com",
+  "wp_user": "your_wp_username",
+  "wp_app_pass": "xxxx xxxx xxxx xxxx xxxx xxxx",
+  "oneSignalAppId": "your_onesignal_app_id",
+  "admobAndroidAppId": "ca-app-pub-xxxxxxxxxxxxxxxx~xxxxxxxxxx",
+  "admobIosAppId": "ca-app-pub-xxxxxxxxxxxxxxxx~xxxxxxxxxx"
+}
+```
 
 ## Setup
 
 1. Install dependencies:
    - `flutter pub get`
-2. Edit `app_config.json` with your WordPress details.
-3. Run app on Android or iOS.
+2. Configure:
+   - copy `app_config.example.json` -> `app_config.json`
+   - fill WordPress values
+3. Run:
+   - `flutter run`
+
+## Production Security (Important)
+
+Do not ship real WordPress credentials inside a client app for production.
+
+Recommended production architecture:
+
+1. Flutter app calls your backend API
+2. Backend calls WordPress API
+3. Backend injects WordPress credentials from server environment variables
+
+Minimum backend controls:
+
+- CORS allowlist
+- Input validation
+- Rate limiting
+- Caching
+- Monitoring/logging
+
+If credentials were ever exposed, rotate `WP_APP_PASS` immediately.
+
+## Optional Build-Time Overrides
+
+You can pass values with `--dart-define`:
+
+- `WP_DOMAIN`
+- `WP_USER`
+- `WP_APP_PASS`
+- `ONESIGNAL_APP_ID`
+- `ADMOB_ANDROID_APP_ID`
+- `ADMOB_IOS_APP_ID`
+
+Example:
+
+```bash
+flutter run \
+  --dart-define=WP_DOMAIN=https://dashboard.your-site.com \
+  --dart-define=WP_USER=your_wp_username \
+  --dart-define=WP_APP_PASS=xxxx
+```
 
 ## Integration Hook Points
 
-- OneSignal: `/Users/user/StudioProjects/wp2fapp/lib/src/services/notification_service.dart`
-- AdMob: `/Users/user/StudioProjects/wp2fapp/lib/src/services/ad_service.dart`
-- Dynamic links: `/Users/user/StudioProjects/wp2fapp/lib/src/services/deep_link_service.dart`
+- OneSignal: `lib/src/services/notification_service.dart`
+- AdMob: `lib/src/services/ad_service.dart`
+- Dynamic deep links: `lib/src/services/deep_link_service.dart`
+
+## License
+
+This project is open-source under the **GNU General Public License v3.0**.  
+See [LICENSE](LICENSE) for the full license text.
