@@ -1,198 +1,288 @@
 # WordPress to Flutter (Android and iOS Support)
 
-A production-ready **WordPress to Flutter app template** for **Android and iOS**, built with **Flutter Material 3**.  
-This project consumes the WordPress REST API and includes modern UX patterns, category browsing, search, comments, sharing, offline cache mode, and integration hooks for OneSignal, AdMob, and deep links.
+A production-focused Flutter starter app that converts any WordPress site into a modern mobile news/content app for Android and iOS.
 
-Keywords: WordPress Flutter app, WordPress API Flutter, Flutter news app, Android iOS WordPress app, Material 3 Flutter template.
+This project uses the WordPress REST API, Material 3 UI, category-based browsing, search, comments, sharing, related posts, offline cache mode, and reusable integration points for notifications, ads, and deep links.
+
+SEO keywords: WordPress to Flutter, Flutter WordPress app, WordPress REST API mobile app, Android iOS WordPress app template, Flutter news app template.
 
 ## App Preview
 
 ![WordPress to Flutter app preview](https://i.imgur.com/5QIwXpn.png)
 
-## Credits
+## Why This Template
 
-- Fully developed by **Chandima Galahitiyawa**
-- Funded by **Turn.Global** for the community
-- Licensed under **GNU GPL v3.0** (see [LICENSE](LICENSE))
+- One codebase for Android and iOS
+- WordPress-connected out of the box
+- Premium-style Material 3 responsive UI
+- Config-driven setup through a single root config file
+- Clear extension points for production integrations
 
-## Features
+## Implemented Features
 
-- WordPress REST API integration with Application Password support
-- Latest posts with infinite scroll
-- Featured posts slider
-- Category filters and category-based post listing
-- Search posts by keyword
-- Post details with author/date/category metadata
-- Embedded media support (video + allowed embed sources)
-- WordPress comments read + submit
-- Related posts from same category
-- Share posts
-- Light / Dark / System theme
-- Offline cache mode + clear cache action
-- Integration hooks for OneSignal, AdMob, and dynamic deep links
+- WordPress API authentication using Application Password
+- Latest posts feed with infinite scroll
+- Featured top 3 posts slider
+- Categories list and category-based filtering
+- Search posts
+- Post detail page with:
+  - Cover image/video thumbnail support
+  - Embedded video rendering from post content
+  - Metadata (date, author, category)
+- Share post link
+- WordPress comments:
+  - Load existing comments
+  - Submit new comments
+- Related posts from the same category
+- Theme modes: System / Light / Dark
+- Offline cache mode + clear cached content
+- Settings page with app preferences and legal links
+- Integration hook points for OneSignal, AdMob, Dynamic Links
 
-## Tech Stack
+## Project Stack
 
-- Flutter (Material 3)
-- Provider state management
-- `http` for API calls
-- `shared_preferences` for app state/cache
-- `flutter_secure_storage` for sensitive local values
+- Flutter + Material 3
+- Provider for state management
+- `http` for API requests
+- `shared_preferences` for settings/cache persistence
+- `flutter_secure_storage` for commenter identity fields
 
-## Project Structure
+## Quick Start
 
-- `lib/src/config/` app configuration loading
-- `lib/src/services/` API, cache, integrations
-- `lib/src/repositories/` repository layer
-- `lib/src/viewmodels/` view models
-- `lib/src/screens/` app screens
-- `lib/src/widgets/` reusable UI widgets
+### 1. Prerequisites
 
-## Configuration
+- Flutter SDK installed
+- Android Studio / Xcode set up for Flutter
+- A WordPress site with REST API enabled
+- A WordPress user with an Application Password
 
-### 1. Use the example file
+### 2. Install dependencies
 
-Copy `app_config.example.json` to `app_config.json`.
+```bash
+flutter pub get
+```
 
-### 2. Update `app_config.json`
+### 3. Configure the app
 
-`app_config.json` is loaded at app startup and used globally.
+Copy the example file and edit values:
 
-Required keys:
+```bash
+cp app_config.example.json app_config.json
+```
 
-- `wp_domain`
-- `wp_user`
-- `wp_app_pass`
+Then update `app_config.json`.
 
-Optional keys:
+Do not commit real production credentials to source control.
 
-- `oneSignalAppId`
-- `admobAndroidAppId`
-- `admobIosAppId`
+### 4. Run
 
-Example:
+```bash
+flutter run
+```
+
+## Configuration (`app_config.json`)
+
+The app reads configuration globally from `app_config.json` in the project root.
+
+### Supported keys
+
+- `app_name`: App display name (title + splash label)
+- `wp_domain`: WordPress base URL used for REST API (example: `https://dash.example.com`)
+- `wp_user`: WordPress username for Application Password auth
+- `wp_app_pass`: WordPress Application Password
+- `app_icon_path`: App icon/brand fallback asset path or URL
+- `app_logo_path`: Logo path or URL used in branded splash screen
+- `oneSignalAppId`: OneSignal App ID (optional)
+- `admobAndroidAppId`: AdMob Android App ID (optional)
+- `admobIosAppId`: AdMob iOS App ID (optional)
+
+### Example
 
 ```json
 {
+  "app_name": "Web2Flutter",
   "wp_domain": "https://dashboard.your-site.com",
   "wp_user": "your_wp_username",
   "wp_app_pass": "xxxx xxxx xxxx xxxx xxxx xxxx",
+  "app_icon_path": "assets/branding/app_icon.png",
+  "app_logo_path": "assets/branding/app_logo.png",
   "oneSignalAppId": "your_onesignal_app_id",
   "admobAndroidAppId": "ca-app-pub-xxxxxxxxxxxxxxxx~xxxxxxxxxx",
   "admobIosAppId": "ca-app-pub-xxxxxxxxxxxxxxxx~xxxxxxxxxx"
 }
 ```
 
-## Setup
+## WordPress Requirements
 
-1. Install dependencies:
-   - `flutter pub get`
-2. Configure:
-   - copy `app_config.example.json` -> `app_config.json`
-   - fill WordPress values
-3. Run:
-   - `flutter run`
+For reliable API access:
 
-## Production Security (Important)
+1. Ensure REST API is accessible:
+   - `https://your-domain.com/wp-json/`
+2. Create an Application Password in WordPress user profile
+3. Use a user role with permission to read posts/categories and submit comments
+4. If media does not load, verify:
+   - WordPress/media URLs are publicly accessible
+   - No firewall/security plugin is blocking API/media requests
+   - Correct protocol/domain (`https://...`) in `wp_domain`
 
-Do not ship real WordPress credentials inside a client app for production.
+## Run and Build
 
-Recommended production architecture:
-
-1. Flutter app calls your backend API
-2. Backend calls WordPress API
-3. Backend injects WordPress credentials from server environment variables
-
-Minimum backend controls:
-
-- CORS allowlist
-- Input validation
-- Rate limiting
-- Caching
-- Monitoring/logging
-
-If credentials were ever exposed, rotate `WP_APP_PASS` immediately.
-
-## Optional Build-Time Overrides
-
-You can pass values with `--dart-define`:
-
-- `WP_DOMAIN`
-- `WP_USER`
-- `WP_APP_PASS`
-- `ONESIGNAL_APP_ID`
-- `ADMOB_ANDROID_APP_ID`
-- `ADMOB_IOS_APP_ID`
-
-Example:
+### Development
 
 ```bash
-flutter run \
-  --dart-define=WP_DOMAIN=https://dashboard.your-site.com \
-  --dart-define=WP_USER=your_wp_username \
-  --dart-define=WP_APP_PASS=xxxx
+flutter run
+```
+
+### Analyze
+
+```bash
+flutter analyze
+```
+
+### Test
+
+```bash
+flutter test
+```
+
+### Android APK
+
+```bash
+flutter build apk --debug
+```
+
+### iOS
+
+```bash
+flutter run -d ios
 ```
 
 ## Integration Hook Points
 
-- OneSignal: `lib/src/services/notification_service.dart`
-- AdMob: `lib/src/services/ad_service.dart`
-- Dynamic deep links: `lib/src/services/deep_link_service.dart`
+These are intentionally left as clean extension points:
+
+- Notifications (OneSignal): `lib/src/services/notification_service.dart`
+- Ads (AdMob): `lib/src/services/ad_service.dart`
+- Dynamic links: `lib/src/services/deep_link_service.dart`
+
+Add production SDK setup in these files without changing app-level feature flow.
+
+## Security Notice (Important)
+
+This template supports direct WordPress auth from the app for quick setup and demos.
+
+For real production environments, do not rely on shipping raw WordPress credentials in a client app. They can be extracted from a built binary.
+
+Recommended approach:
+
+1. Mobile app calls your own backend API
+2. Backend calls WordPress API using server-side credentials
+3. Backend returns only required data to the app
+
+If credentials are exposed, rotate `wp_app_pass` immediately.
 
 ## Production API Proxy (Recommended)
 
-For production deployments, design the WordPress proxy API as a layered, high-scale service:
+Use this architecture for scale and security:
 
-### 1. Edge Layer
+1. Edge/CDN Layer
+- WAF, TLS, bot filtering, coarse rate limiting
 
-- CDN in front of API (`Cloudflare` / `Fastly` / `CloudFront`)
-- WAF + bot protection
-- TLS termination and rate limiting at edge
+2. API Gateway Layer
+- Single entry domain (`api.yourdomain.com`)
+- Auth, quotas, CORS allowlist, request limits
 
-### 2. API Gateway Layer
+3. Proxy Service Layer
+- Stateless API instances
+- Strict allowlist of upstream WordPress endpoints
+- Input validation and response shaping
 
-- Single public entry (`api.yourdomain.com`)
-- Request auth, quotas, and per-client throttling
-- CORS allowlist and request size limits
+4. Caching Layer
+- Redis/in-memory cache for hot routes (`latest`, `featured`, `categories`, `search`)
+- TTL-based invalidation for freshness
 
-### 3. Application Layer (Proxy Service)
+5. Observability & Operations
+- Structured logs, metrics, tracing, alerts
+- Retries, timeouts, circuit breakers
 
-- Stateless backend instances (horizontal scaling)
-- Strict allowlist of upstream WordPress routes
-- Input validation for query params and comment payloads
-- Response shaping (return only fields required by mobile app)
+6. Stable Mobile Contract
+- Versioned endpoints like `/v1/posts/latest`, `/v1/posts/search`, `/v1/comments`
+- Keep mobile response schema stable regardless of WordPress internals
 
-### 4. Data and Cache Layer
+## Troubleshooting
 
-- Redis cache for feed endpoints (`latest`, `featured`, `categories`)
-- Cache keys include route + query (`page`, `per_page`, `category`)
-- Short TTL for feed freshness (for example 30-120 seconds)
-- Separate lower TTL/no-cache for comments write paths
+### Android build fails after major dependency upgrades
 
-### 5. Security and Secrets
+If you see Kotlin/plugin errors (for example unresolved classes from `share_plus` or `package_info_plus`), keep these compatible versions:
 
-- Store `WP_BASE_URL`, `WP_USER`, `WP_APP_PASS` in secret manager/env
-- Never expose WordPress credentials to client apps
-- Rotate app password on a schedule
-- Optional signed client tokens (JWT) + device attestation
+- `share_plus: ^10.1.4`
+- `package_info_plus: ^8.3.1`
 
-### 6. Reliability and Operations
+Then run:
 
-- Timeouts + retries with backoff for WordPress upstream
-- Circuit breaker/fallback for upstream failures
-- Structured logs, metrics, tracing, and alerting
-- Blue/green or rolling deploys with health checks
+```bash
+flutter clean
+flutter pub get
+flutter build apk --debug
+```
 
-### 7. Recommended Endpoint Strategy
+### ADB install error: Broken pipe (32)
 
-- Keep mobile contract stable and versioned: `/v1/posts/latest`, `/v1/posts/search`, `/v1/comments`
-- Do not expose raw WordPress admin routes
-- Add pagination cursors or consistent page-based strategy
-- Add abuse controls on comment submission endpoints
+```bash
+adb kill-server
+adb start-server
+flutter run
+```
 
-This design gives better performance, security, and operational stability than direct WordPress access from the client.
+### Web build note
+
+This repository is configured for Android and iOS. If you also want Web support, run:
+
+```bash
+flutter create .
+```
+
+## Project Structure
+
+- `lib/src/config/` app configuration loading
+- `lib/src/services/` API, cache, and integration services
+- `lib/src/repositories/` data repository layer
+- `lib/src/viewmodels/` state/view models
+- `lib/src/screens/` screens and app shell
+- `lib/src/widgets/` reusable UI components
+
+## Community Credits
+
+- Fully developed by **Chandima Galahitiyawa**
+- Funded by **Turn.Global** for the community
+
+## Contributing
+
+Community contributions are welcome.
+
+1. Fork the repository
+2. Create a feature branch
+3. Commit your changes
+4. Open a pull request with clear test notes
 
 ## License
 
-This project is open-source under the **GNU General Public License v3.0**.  
+This project is **100% free and open-source** under the **GNU General Public License v3.0 (GPL-3.0)**.
+
+Anyone can:
+
+- Use it for personal or commercial projects
+- Modify the source code
+- Develop and distribute their own versions
+
+No license fee, royalty, or paid permission is required.
+
+GPL note for redistribution:
+
+- Keep the same GPL-3.0 license
+- Keep copyright/license notices
+- Provide source code for distributed modified builds
+
+This software is provided without warranty, as defined by GPL-3.0.
+
 See [LICENSE](LICENSE) for the full license text.

@@ -3,84 +3,66 @@ import 'dart:convert';
 import 'package:flutter/services.dart' show rootBundle;
 
 class AppConfig {
-  static String wpDomain = '';
-  static String wpUser = '';
-  static String wpAppPass = '';
-  static String oneSignalAppId = '';
-  static String admobAndroidAppId = '';
-  static String admobIosAppId = '';
+  // App display name used in the app shell and splash UI.
+  static String appName = '';
 
-  // Compile-time overrides:
-  // flutter run --dart-define=WP_DOMAIN=... --dart-define=WP_USER=... --dart-define=WP_APP_PASS=...
-  static const _envWpDomain = String.fromEnvironment('WP_DOMAIN');
-  static const _envWpUser = String.fromEnvironment('WP_USER');
-  static const _envWpAppPass = String.fromEnvironment('WP_APP_PASS');
-  static const _envOneSignalAppId = String.fromEnvironment('ONESIGNAL_APP_ID');
-  static const _envAdmobAndroidAppId = String.fromEnvironment(
-    'ADMOB_ANDROID_APP_ID',
-  );
-  static const _envAdmobIosAppId = String.fromEnvironment('ADMOB_IOS_APP_ID');
+  // WordPress API base domain, example: https://dashboard.your-site.com
+  static String wpDomain = '';
+
+  // WordPress username used for Application Password authentication.
+  static String wpUser = '';
+
+  // WordPress Application Password used for API authentication.
+  static String wpAppPass = '';
+
+  // App icon asset path or URL used for branding fallback.
+  static String appIconPath = '';
+
+  // App logo asset path or URL used on splash and brand screens.
+  static String appLogoPath = '';
+
+  // OneSignal app id for push notification integration.
+  static String oneSignalAppId = '';
+
+  // AdMob Android app id for ads initialization.
+  static String admobAndroidAppId = '';
+
+  // AdMob iOS app id for ads initialization.
+  static String admobIosAppId = '';
 
   static Future<void> loadFromAsset({String path = 'app_config.json'}) async {
     try {
       final raw = await rootBundle.loadString(path);
       final json = jsonDecode(raw) as Map<String, dynamic>;
 
-      wpDomain = _readString(json, [
-        'wp_domain',
-        'WP_DOMAIN',
-        'wpDomain',
-        'wpBaseUrl',
-        'WP_BASE_URL',
-        'domain',
-        'DOMAIN',
-      ]);
-      wpUser = _readString(json, [
-        'wp_user',
-        'WP_USER',
-        'wpUsername',
-        'WP_USERNAME',
-      ]);
-      wpAppPass = _readString(json, [
-        'wp_app_pass',
-        'WP_APP_PASS',
-        'wpAppPassword',
-        'WP_APP_PASSWORD',
-      ]);
-      oneSignalAppId = _readString(json, [
-        'oneSignalAppId',
-        'ONESIGNAL_APP_ID',
-      ]);
-      admobAndroidAppId = _readString(json, [
-        'admobAndroidAppId',
-        'ADMOB_ANDROID_APP_ID',
-      ]);
-      admobIosAppId = _readString(json, ['admobIosAppId', 'ADMOB_IOS_APP_ID']);
+      appName = _readString(json, 'app_name');
+      wpDomain = _readString(json, 'wp_domain');
+      wpUser = _readString(json, 'wp_user');
+      wpAppPass = _readString(json, 'wp_app_pass');
+
+      final icon = _readString(json, 'app_icon_path');
+      if (icon.isNotEmpty) {
+        appIconPath = icon;
+      }
+
+      final logo = _readString(json, 'app_logo_path');
+      if (logo.isNotEmpty) {
+        appLogoPath = logo;
+      }
+
+      // Optional integration keys; keep empty if not provided.
+      oneSignalAppId = _readString(json, 'oneSignalAppId');
+      admobAndroidAppId = _readString(json, 'admobAndroidAppId');
+      admobIosAppId = _readString(json, 'admobIosAppId');
     } catch (_) {
       // Keep empty defaults when config file is missing or invalid.
     }
-
-    // Apply secure build-time overrides last.
-    wpDomain = _envWpDomain.isNotEmpty ? _envWpDomain.trim() : wpDomain;
-    wpUser = _envWpUser.isNotEmpty ? _envWpUser.trim() : wpUser;
-    wpAppPass = _envWpAppPass.isNotEmpty ? _envWpAppPass.trim() : wpAppPass;
-    oneSignalAppId = _envOneSignalAppId.isNotEmpty
-        ? _envOneSignalAppId.trim()
-        : oneSignalAppId;
-    admobAndroidAppId = _envAdmobAndroidAppId.isNotEmpty
-        ? _envAdmobAndroidAppId.trim()
-        : admobAndroidAppId;
-    admobIosAppId = _envAdmobIosAppId.isNotEmpty
-        ? _envAdmobIosAppId.trim()
-        : admobIosAppId;
   }
 
-  static String _readString(Map<String, dynamic> json, List<String> keys) {
-    for (final key in keys) {
-      final value = json[key];
-      if (value is String && value.trim().isNotEmpty) {
-        return value.trim();
-      }
+  static String _readString(Map<String, dynamic> json, String key) {
+    final value = json[key];
+    if (value is String && value.trim().isNotEmpty) {
+      return value.trim();
     }
     return '';
   }

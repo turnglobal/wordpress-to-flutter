@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import 'config/app_config.dart';
 import 'repositories/post_repository.dart';
+import 'screens/brand_splash_screen.dart';
 import 'screens/main_shell_screen.dart';
 import 'services/ad_service.dart';
 import 'services/deep_link_service.dart';
@@ -43,16 +45,12 @@ class _Bootstrap extends StatefulWidget {
 }
 
 class _BootstrapState extends State<_Bootstrap> {
-  bool _bootstrapped = false;
+  late final Future<void> _bootstrapFuture;
 
   @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    if (_bootstrapped) {
-      return;
-    }
-    _bootstrapped = true;
-    _initializeIntegrations();
+  void initState() {
+    super.initState();
+    _bootstrapFuture = _initializeIntegrations();
   }
 
   Future<void> _initializeIntegrations() async {
@@ -60,9 +58,19 @@ class _BootstrapState extends State<_Bootstrap> {
     final adService = context.read<AdService>();
     final deepLinkService = context.read<DeepLinkService>();
 
-    await notificationService.initialize();
-    await adService.initialize();
-    await deepLinkService.initialize();
+    await Future.wait([
+      _safeInitialize(notificationService.initialize),
+      _safeInitialize(adService.initialize),
+      _safeInitialize(deepLinkService.initialize),
+    ]);
+  }
+
+  Future<void> _safeInitialize(Future<void> Function() action) async {
+    try {
+      await action().timeout(const Duration(seconds: 3));
+    } catch (_) {
+      // Non-critical integrations should never block app startup.
+    }
   }
 
   @override
@@ -71,11 +79,19 @@ class _BootstrapState extends State<_Bootstrap> {
 
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'WP2F App',
+      title: AppConfig.appName.isNotEmpty ? AppConfig.appName : 'WP2F App',
       themeMode: themeController.themeMode,
       theme: AppTheme.light(),
       darkTheme: AppTheme.dark(),
-      home: const MainShellScreen(),
+      home: FutureBuilder<void>(
+        future: _bootstrapFuture,
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.done) {
+            return const MainShellScreen();
+          }
+          return const BrandSplashScreen();
+        },
+      ),
     );
   }
 }

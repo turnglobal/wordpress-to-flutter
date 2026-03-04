@@ -160,7 +160,7 @@ class _HomeBody extends StatelessWidget {
                   if (featuredPosts.isNotEmpty) ...[
                     const SectionHeader(
                       title: 'Featured',
-                      subtitle: 'Latest 3 posts • Spotify style slider',
+                      subtitle: 'Top stories',
                     ),
                     _FeaturedSpotifyCarousel(
                       posts: featuredPosts,
@@ -182,8 +182,12 @@ class _HomeBody extends StatelessWidget {
                         ? 'Recent Posts'
                         : selectedCategoryName ?? 'Filtered Posts',
                     subtitle: vm.selectedCategoryId == null
-                        ? 'All posts after the featured top 3'
-                        : 'Posts in selected category',
+                        ? 'Fresh updates from WordPress'
+                        : 'Latest in selected category',
+                    trailing: _HeaderPill(
+                      icon: Icons.auto_awesome_rounded,
+                      label: '${recentPosts.length} posts',
+                    ),
                   ),
                   if (recentPosts.isEmpty)
                     const Card(
@@ -344,6 +348,10 @@ class _FeaturedSpotifyCarouselState extends State<_FeaturedSpotifyCarousel> {
                             Image.network(
                               post.thumbnailUrl!,
                               fit: BoxFit.cover,
+                              cacheWidth:
+                                  (900 * MediaQuery.devicePixelRatioOf(context))
+                                      .round(),
+                              filterQuality: FilterQuality.low,
                               errorBuilder: (context, error, stackTrace) =>
                                   Container(color: const Color(0xFF181818)),
                             )
@@ -545,6 +553,41 @@ class _PostsGrid extends StatelessWidget {
           onTap: () => onOpenPost(post),
         );
       },
+    );
+  }
+}
+
+class _HeaderPill extends StatelessWidget {
+  const _HeaderPill({required this.icon, required this.label});
+
+  final IconData icon;
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.primary.withValues(alpha: 0.16),
+        borderRadius: BorderRadius.circular(999),
+        border: Border.all(
+          color: theme.colorScheme.primary.withValues(alpha: 0.28),
+        ),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 14, color: theme.colorScheme.onSurface),
+          const SizedBox(width: 6),
+          Text(
+            label,
+            style: theme.textTheme.labelMedium?.copyWith(
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

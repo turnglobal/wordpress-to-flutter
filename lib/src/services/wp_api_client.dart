@@ -25,18 +25,34 @@ class WpApiClient {
 
   final http.Client _http;
   final PostCache _cache;
+  Map<String, String>? _cachedConnection;
 
   Future<void> saveConnection({
     required String baseUrl,
     required String username,
     required String appPassword,
   }) async {
-    await _writeSecure(_baseUrlKey, _sanitizeBaseUrl(baseUrl));
-    await _writeSecure(_usernameKey, username.trim());
-    await _writeSecure(_appPasswordKey, _normalizeAppPassword(appPassword));
+    final sanitizedBase = _sanitizeBaseUrl(baseUrl);
+    final trimmedUser = username.trim();
+    final normalizedPass = _normalizeAppPassword(appPassword);
+
+    await _writeSecure(_baseUrlKey, sanitizedBase);
+    await _writeSecure(_usernameKey, trimmedUser);
+    await _writeSecure(_appPasswordKey, normalizedPass);
+
+    _cachedConnection = {
+      'baseUrl': sanitizedBase,
+      'username': trimmedUser,
+      'appPassword': normalizedPass,
+    };
   }
 
   Future<Map<String, String>> getConnection() async {
+    final cached = _cachedConnection;
+    if (cached != null) {
+      return cached;
+    }
+
     String storedBaseUrl = '';
     String storedUsername = '';
     String storedPassword = '';
@@ -78,7 +94,7 @@ class WpApiClient {
       }
     }
 
-    return {
+    final resolved = {
       'baseUrl': _sanitizeBaseUrl(
         storedBaseUrl.isNotEmpty ? storedBaseUrl : AppConfig.wpDomain,
       ),
@@ -87,6 +103,8 @@ class WpApiClient {
           ? storedPassword
           : AppConfig.wpAppPass,
     };
+    _cachedConnection = resolved;
+    return resolved;
   }
 
   Future<bool> isOfflineModeEnabled() async {

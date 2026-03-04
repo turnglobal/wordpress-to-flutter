@@ -33,13 +33,26 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
   final _commentController = TextEditingController();
 
   late Future<List<WpComment>> _commentsFuture;
+  late List<_ContentBlock> _contentBlocks;
+  late String? _embeddedVideo;
+  late String _primaryCategory;
   bool _submittingComment = false;
 
   @override
   void initState() {
     super.initState();
+    _hydratePostData();
     _commentsFuture = context.read<PostRepository>().comments(widget.post.id);
     _loadCommenterIdentity();
+  }
+
+  @override
+  void didUpdateWidget(covariant PostDetailScreen oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.post.id != widget.post.id) {
+      _hydratePostData();
+      _commentsFuture = context.read<PostRepository>().comments(widget.post.id);
+    }
   }
 
   @override
@@ -125,6 +138,15 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
     }
   }
 
+  void _hydratePostData() {
+    final post = widget.post;
+    _embeddedVideo = _extractFirstVideoUrl(post.content);
+    _contentBlocks = _extractContentBlocks(post.content);
+    _primaryCategory = post.categoryNames.isNotEmpty
+        ? post.categoryNames.first
+        : 'Uncategorized';
+  }
+
   void _showSnackBar(String message) {
     if (!mounted) {
       return;
@@ -138,11 +160,9 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
   Widget build(BuildContext context) {
     final repo = context.read<PostRepository>();
     final post = widget.post;
-    final embeddedVideo = _extractFirstVideoUrl(post.content);
-    final contentBlocks = _extractContentBlocks(post.content);
-    final primaryCategory = post.categoryNames.isNotEmpty
-        ? post.categoryNames.first
-        : 'Uncategorized';
+    final embeddedVideo = _embeddedVideo;
+    final contentBlocks = _contentBlocks;
+    final primaryCategory = _primaryCategory;
 
     return Scaffold(
       appBar: AppBar(
@@ -201,6 +221,11 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
                           height: 260,
                           width: double.infinity,
                           fit: BoxFit.cover,
+                          cacheWidth:
+                              (MediaQuery.sizeOf(context).width *
+                                      MediaQuery.devicePixelRatioOf(context))
+                                  .round(),
+                          filterQuality: FilterQuality.low,
                           errorBuilder: (context, error, stackTrace) =>
                               const SizedBox.shrink(),
                         ),

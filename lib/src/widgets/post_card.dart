@@ -138,31 +138,48 @@ class _MediaThumb extends StatelessWidget {
     return SizedBox(
       width: width,
       height: height,
-      child: Stack(
-        fit: StackFit.expand,
-        children: [
-          if (url != null && url!.isNotEmpty)
-            Image.network(
-              url!,
-              fit: BoxFit.cover,
-              errorBuilder: (context, error, stackTrace) =>
-                  _Fallback(theme: theme),
-            )
-          else
-            _Fallback(theme: theme),
-          if (isVideo)
-            Align(
-              alignment: Alignment.center,
-              child: Container(
-                decoration: BoxDecoration(
-                  color: Colors.black54,
-                  borderRadius: BorderRadius.circular(999),
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final dpr = MediaQuery.devicePixelRatioOf(context);
+          final logicalWidth = constraints.maxWidth.isFinite
+              ? constraints.maxWidth
+              : width;
+          final logicalHeight = constraints.maxHeight.isFinite
+              ? constraints.maxHeight
+              : height;
+          final cacheWidth = (logicalWidth * dpr).round().clamp(1, 4096);
+          final cacheHeight = (logicalHeight * dpr).round().clamp(1, 4096);
+
+          return Stack(
+            fit: StackFit.expand,
+            children: [
+              if (url != null && url!.isNotEmpty)
+                Image.network(
+                  url!,
+                  fit: BoxFit.cover,
+                  cacheWidth: cacheWidth,
+                  cacheHeight: cacheHeight,
+                  filterQuality: FilterQuality.low,
+                  errorBuilder: (context, error, stackTrace) =>
+                      _Fallback(theme: theme),
+                )
+              else
+                _Fallback(theme: theme),
+              if (isVideo)
+                Align(
+                  alignment: Alignment.center,
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: Colors.black54,
+                      borderRadius: BorderRadius.circular(999),
+                    ),
+                    padding: const EdgeInsets.all(8),
+                    child: const Icon(Icons.play_arrow, color: Colors.white),
+                  ),
                 ),
-                padding: const EdgeInsets.all(8),
-                child: const Icon(Icons.play_arrow, color: Colors.white),
-              ),
-            ),
-        ],
+            ],
+          );
+        },
       ),
     );
   }

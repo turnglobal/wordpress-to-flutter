@@ -1,7 +1,10 @@
 {
-  "wp_domain": "",
-  "wp_user": "",
-  "wp_app_pass": "",
+  "app_name": "Web2Flutter",
+  "wp_domain": "https://dash.devturn.site",
+  "wp_user": "chandima",
+  "wp_app_pass": "lbgc FEMb Pm3d Q00d sj1H qhlh",
+  "app_icon_path": "assets/branding/app_icon.png",
+  "app_logo_path": "assets/branding/app_logo.png",
   "oneSignalAppId": "",
   "admobAndroidAppId": "",
   "admobIosAppId": ""
